@@ -38,7 +38,7 @@ const _popQueueItem = (url) => {
 function _registerListener(win, opts = {}) {
 
     lastWindowCreated = win;
-    downloadFolder = opts.downloadFolder || downloadFolder;
+    downloadFolder = typeof opts.downloadFolder !== 'undefined' ? opts.downloadFolder : downloadFolder;
 
     const listener = (e, item) => {
 
