@@ -10,6 +10,12 @@ let lastWindowCreated;
 
 const queue = [];
 
+function fixedEncodeURIComponent (str) {
+    return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
+        return '%' + c.charCodeAt(0).toString(16);
+    });
+}
+
 const _popQueueItem = (url) => {
     let queueItem = queue.find(item => item.url === url);
     queue.splice(queue.indexOf(queueItem), 1);
@@ -43,7 +49,7 @@ function _registerListener(win, opts = {}) {
     const listener = (e, item) => {
 
         const itemUrl = decodeURIComponent(item.getURLChain()[0] || item.getURL())
-        const itemFilename = decodeURIComponent(item.getFilename());
+        const itemFilename = path.basename(itemUrl);
 
         let queueItem = _popQueueItem(itemUrl);
         let ReceivedBytesArr = [];
@@ -135,9 +141,12 @@ const download = (options, callback) => {
     let win = BrowserWindow.getFocusedWindow() || lastWindowCreated;
     options = Object.assign({}, { path: '' }, options);
 
+    const filename = decodeURIComponent(path.basename(options.url));
+    
+    options.url = options.url.replace(filename, fixedEncodeURIComponent(filename));
+    
     const request = net.request(options.url);
     
-    const filename = decodeURIComponent(path.basename(options.url));
     const url = decodeURIComponent(options.url);
 
     const folder = options.downloadFolder || downloadFolder
